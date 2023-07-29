@@ -1,0 +1,24 @@
+{{ define "otelcollector.config.kubelet" }}
+- job_name: integrations/kubernetes/kubelet
+  kubernetes_sd_configs:
+    - role: node
+  relabel_configs:
+    - target_label: __address__
+      replacement: kubernetes.default.svc.cluster.local:443
+    - source_labels: ["__meta_kubernetes_node_name"]
+      regex: "(.+)"
+      replacement: "/api/v1/nodes/$${1}/proxy/metrics"
+      target_label: "__metrics_path__"
+  scheme: https
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+  tls_config:
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    insecure_skip_verify: true
+    server_name: kubernetes
+{{- if .Values.metrics.kubelet.allowList }}
+  metric_relabel_configs:
+    - action: keep
+      source_labels: ["__name__"]
+      regex: "up|{{ join "|" .Values.metrics.kubelet.allowList }}"
+{{- end }}
+{{ end }}

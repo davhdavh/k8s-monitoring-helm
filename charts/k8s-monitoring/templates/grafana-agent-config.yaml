@@ -1,3 +1,4 @@
+{{- if eq .Values.collector.type "agent" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -64,3 +65,4 @@ data:
 {{- if .Values.extraConfig }}
 {{ .Values.extraConfig | indent 4 }}
 {{ end }}
+{{- end }}

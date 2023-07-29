@@ -15,6 +15,11 @@ dependencies:
 - name: grafana-agent
   version: 0.18.0
   repository: https://grafana.github.io/helm-charts
+  condition: grafana-agent.enabled
+- name: opentelemetry-collector
+  version: 0.62.3
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  condition: opentelemetry-collector.enabled
 - name: kube-state-metrics
   version: 5.10.1
   repository: https://prometheus-community.github.io/helm-charts

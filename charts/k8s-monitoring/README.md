@@ -56,6 +56,7 @@ The Prometheus and Loki services may be hosted on the same cluster, or remotely 
 | Repository | Name | Version |
 |------------|------|---------|
 | https://grafana.github.io/helm-charts | grafana-agent | 0.18.0 |
+| https://open-telemetry.github.io/opentelemetry-helm-charts | opentelemetry-collector | 0.62.3 |
 | https://opencost.github.io/opencost-helm-chart | opencost | 1.18.0 |
 | https://prometheus-community.github.io/helm-charts | kube-state-metrics | 5.10.1 |
 | https://prometheus-community.github.io/helm-charts | prometheus-node-exporter | 4.21.0 |
@@ -66,6 +67,7 @@ The Prometheus and Loki services may be hosted on the same cluster, or remotely 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | cluster.name | string | `""` | (required) The name of this cluster, which will be set in all labels |
+| collector.type | string | `"agent"` |  |
 | externalServices.loki.host | string | `""` | (required) Loki host where logs and events will be sent |
 | externalServices.loki.password | string | `""` | (required) Loki basic auth password |
 | externalServices.loki.username | string | `""` | (required) Loki basic auth username |

@@ -1,0 +1,56 @@
+{{- if eq .Values.collector.type "otel" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-k8s-monitoring-config
+  namespace: {{ .Release.Namespace }}
+data:
+  relay.yaml: |-
+    extensions:
+      # The health_check extension is mandatory.
+      # Without the health_check extension the collector will fail the readiness and liveliness probes.
+      # The health_check extension can be modified, but should never be removed.
+      health_check: {}
+    processors:
+      batch: {}
+    receivers:
+{{- if .Values.metrics.enabled }}
+      prometheus:
+        config:
+          scrape_configs:
+  {{- if .Values.metrics.kubelet.enabled }}
+    {{- include "otelcollector.config.kubelet" . | indent 10}}
+  {{- end }}
+
+  {{- if .Values.metrics.cadvisor.enabled }}
+    {{- include "otelcollector.config.cadvisor" . | indent 10}}
+  {{- end }}
+
+  {{- if (index .Values.metrics "kube-state-metrics").enabled }}
+    {{- include "otelcollector.config.kube_state_metrics" . | indent 10}}
+  {{- end }}
+
+  {{- if (index .Values.metrics "node-exporter").enabled }}
+    {{- include "otelcollector.config.node_exporter" . | indent 10}}
+  {{- end }}
+
+  {{- if .Values.metrics.cost.enabled }}
+    {{- include "otelcollector.config.opencost" . | indent 10}}
+  {{- end }}
+{{- end }}
+    exporters:
+{{- if .Values.metrics.enabled }}
+  {{- include "otelcollector.config.prometheus" . | indent 10 }}
+{{ end }}
+    service:
+      extensions:
+        - health_check
+      pipelines:
+        metrics/prod:
+          receivers: [ prometheus ]
+          processors: [ batch ]
+          exporters: [ prometheusremotewrite ]
+      telemetry:
+        logs:
+          level: 'debug'
+{{- end }}
