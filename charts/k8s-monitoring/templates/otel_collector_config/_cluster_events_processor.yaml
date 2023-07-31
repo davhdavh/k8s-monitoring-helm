@@ -1,0 +1,14 @@
+{{ define "otelcollector.config.cluster_events_processor" }}
+clusterevents:
+  attributes:
+    actions:
+      - action: insert
+        key: loki.attribute.labels
+        value: event.domain
+
+  resource:
+    attributes:
+      - action: insert
+        key: loki.resource.labels
+        value: service.name
+{{ end }}

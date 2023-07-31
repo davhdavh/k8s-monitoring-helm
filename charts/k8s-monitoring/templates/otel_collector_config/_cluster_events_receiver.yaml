@@ -1,0 +1,4 @@
+{{ define "otelcollector.config.cluster_events_receiver" }}
+k8s_events:
+  namespaces: [default, my_namespace]
+{{ end }}

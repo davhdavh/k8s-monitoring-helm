@@ -38,18 +38,42 @@ data:
     {{- include "otelcollector.config.opencost" . | indent 10}}
   {{- end }}
 {{- end }}
+
+{{- if and .Values.logs.enabled .Values.logs.cluster_events.enabled }}
+  {{- include "otelcollector.config.cluster_events_receiver" . | indent 10 }}
+{{ end }}
+
+    processors:
+{{- if and .Values.logs.enabled .Values.logs.cluster_events.enabled }}
+  {{- include "otelcollector.config.cluster_events_processor" . | indent 10 }}
+{{ end }}
+
     exporters:
 {{- if .Values.metrics.enabled }}
   {{- include "otelcollector.config.prometheus" . | indent 10 }}
 {{ end }}
+{{- if .Values.logs.enabled }}
+  {{- include "otelcollector.config.loki" . | indent 10 }}
+{{ end }}
+
+
     service:
       extensions:
         - health_check
       pipelines:
+{{- if .Values.metrics.enabled }}
         metrics/prod:
           receivers: [ prometheus ]
           processors: [ batch ]
           exporters: [ prometheusremotewrite ]
+{{ end }}
+{{- if .Values.logs.enabled }}
+      logs:
+  {{- if .Values.logs.cluster_events.enabled }}
+        receivers: [k8s_events]
+        exporters: [loki]
+  {{ end }}
+{{ end }}
       telemetry:
         logs:
           level: 'debug'

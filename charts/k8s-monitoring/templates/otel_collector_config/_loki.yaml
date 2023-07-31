@@ -1,0 +1,8 @@
+{{ define "otelcollector.config.loki" }}
+loki:
+  endpoint: {{ .Values.externalServices.loki.host }}{{ .Values.externalServices.loki.writeEndpoint }}
+  default_labels_enabled:
+    job: false
+  headers:
+    Authorization: Basic {{ tpl ("{{ .Values.externalServices.prometheus.username }}:{{ .Values.externalServices.prometheus.password }}") . | b64enc }}
+{{ end }}

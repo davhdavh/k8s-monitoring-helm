@@ -2,7 +2,7 @@
 prometheusremotewrite:
   external_labels:
     cluster: {{ .Values.cluster.name }}
-  endpoint: {{ .Values.externalServices.prometheus.host }}/api/prom/push
+  endpoint: {{ .Values.externalServices.prometheus.host }}{{ .Values.externalServices.prometheus.writeEndpoint }}
   headers:
     Authorization: Basic {{ tpl ("{{ .Values.externalServices.prometheus.username }}:{{ .Values.externalServices.prometheus.password }}") . | b64enc }}
 {{ end }}
