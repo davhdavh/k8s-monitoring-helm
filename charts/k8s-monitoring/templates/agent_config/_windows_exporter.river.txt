@@ -1,0 +1,64 @@
+{{ define "agent.config.windows_exporter" }}
+// Windows Exporter
+discovery.relabel "windows_exporter" {
+  targets = discovery.kubernetes.services.targets
+{{- if (index .Values "prometheus-windows-exporter").enabled }}
+  rule {
+    source_labels = ["__meta_kubernetes_service_label_app_kubernetes_io_instance"]
+    regex = "{{ .Release.Name }}"
+    action = "keep"
+  }
+{{- end }}
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    action = "replace"
+    target_label = "instance"
+  }
+  rule {
+    source_labels = ["__name__"]
+    replacement   = local.file.cluster_name.content
+    target_label  = "cluster"
+  }
+}
+
+prometheus.scrape "windows_exporter" {
+  job_name   = "integrations/kubernetes/windows-exporter"
+  targets  = discovery.relabel.windows_exporter.output
+  forward_to = [prometheus.relabel.windows_exporter.receiver]
+}
+
+prometheus.relabel "windows_exporter" {
+  rule {
+    sourceLabels = ["__name__"]
+    regex = "windows_cpu_time_total"
+    replacement: node_cpu_seconds_total
+    targetLabel: __name__
+  }
+  rule {
+    sourceLabels = ["volume"]
+    regex = "windows_logical_disk_size_bytes"
+    replacement = "mountpoint"
+    targetLabel = "mountpoint"
+  }
+  rule {
+    sourceLabels = ["__name__"]
+    regex = "windows_logical_disk_size_bytes"
+    replacement = "node_filesystem_size_bytes"
+    targetLabel = "__name__"
+  }
+  rule {
+    sourceLabels = ["__name__"]
+    regex = "windows_logical_disk_free_bytes"
+    replacement = "node_filesystem_avail_bytes"
+    targetLabel = "__name__"
+  }
+{{- if (index .Values.metrics "windows-exporter").allowList }}
+  rule {
+    source_labels = ["__name__"]
+    regex = "up|{{ join "|" (index .Values.metrics "windows-exporter").allowList }}"
+    action = "keep"
+  }
+{{- end }}
+  forward_to = [prometheus.remote_write.grafana_cloud_prometheus.receiver]
+}
+{{ end }}

@@ -107,6 +107,15 @@ metrics:
     - process_cpu_seconds_total
     - process_resident_memory_bytes
 
+  windows-exporter:
+    enabled: true
+    allowList:
+      - windows_.*
+      - node_cpu_seconds_total
+      - node_filesystem_size_bytes
+      - node_filesystem_avail_bytes
+      - container_cpu_usage_seconds_total
+
   # Cluster metrics from the Kubelet
   kubelet:
     # -- Scrape cluster metrics from the Kubelet
@@ -279,6 +288,21 @@ prometheus-node-exporter:
   # Set this to false if your cluster already has Node Exporter, or if you do
   # not want to scrape metrics from Node Exporter.
   enabled: true
+
+# Settings for the Windows Exporter deployment
+prometheus-windows-exporter:
+  # -- Should this helm chart deploy Windows Exporter to the cluster.
+  # Set this to false if your cluster already has Windows Exporter, or if you do
+  # not want to scrape metrics from Windows Exporter.
+  enabled: true
+
+  config: |-
+    collectors:
+      enabled: cpu,cs,container,logical_disk,memory,net,os
+    collector:
+      service:
+        services-where: "Name='containerd' or Name='kubelet'"
+
 
 prometheus-operator-crds:
   # -- Should this helm chart deploy the Prometheus Operator CRDs to the cluster.
